@@ -66,12 +66,47 @@ jobs:
           python -m pip list
           buildozer version
 
-      # 7. 正式打包 APK（首次约 30~90 分钟，需下载 SDK/NDK 并编译 FFmpeg）
+      # 7. 预下载 freetype 源码：savannah.gnu.org 经常 502，提前用多个镜像兜底
+      #    p4a 发现包已存在会跳过下载（双架构合并构建目录名固定）
+      - name: 预下载 freetype 源码（镜像兜底）
+        run: |
+          set -e
+          FT_DIR=".buildozer/android/platform/build-arm64-v8a_armeabi-v7a/packages/freetype"
+          mkdir -p "$FT_DIR"
+          F="freetype-2.10.1.tar.gz"
+          URLS=(
+            "https://downloads.sourceforge.net/project/freetype/freetype2/2.10.1/$F"
+            "https://mirrors.ocf.berkeley.edu/nongnu/freetype/$F"
+            "https://mirror.csclub.uwaterloo.ca/nongnu/freetype/$F"
+            "https://download.savannah.gnu.org/releases/freetype/$F"
+          )
+          for u in "${URLS[@]}"; do
+            echo "==> 尝试 $u"
+            if curl -fL --retry 3 --connect-timeout 20 -o "$FT_DIR/$F.tmp" "$u"; then
+              if gzip -t "$FT_DIR/$F.tmp" 2>/dev/null; then
+                mv "$FT_DIR/$F.tmp" "$FT_DIR/$F"
+                echo "==> freetype 预下载成功"; ls -lh "$FT_DIR/$F"; exit 0
+              fi
+            fi
+            rm -f "$FT_DIR/$F.tmp"
+          done
+          echo "==> 预下载未成功也不退出，交给 buildozer 自行重试下载"
+
+      # 8. 正式打包 APK（首次约 30~90 分钟，需下载 SDK/NDK 并编译 FFmpeg）
+      #    最多自动重试 3 轮，已下载的内容有缓存，重试不会从零开始
       - name: 打包 APK
         run: |
           source $HOME/venv/bin/activate
           export BUILDOZER_WARN_ON_ROOT=1
-          yes | buildozer -v android debug
+          for i in 1 2 3; do
+            echo "=========== 第 $i 次构建尝试 ==========="
+            if yes | buildozer -v android debug; then
+              echo "=========== 构建成功 ==========="; exit 0
+            fi
+            echo "第 $i 次未成功，15 秒后利用缓存重试..."
+            sleep 15
+          done
+          echo "三次构建均失败"; exit 1
 
       # 8. 上传 APK，构建成功后在该运行页面的 Artifacts 处下载
       - name: 上传 APK 产物
