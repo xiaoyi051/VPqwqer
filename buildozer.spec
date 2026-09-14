@@ -23,7 +23,7 @@ android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, READ_MEDIA_
 # 目标 SDK / 最低 SDK / 架构
 android.api = 34
 android.minapi = 21
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # 自动接受 SDK 协议、开启 AndroidX
 android.accept_sdk_license = True
