@@ -85,7 +85,10 @@ jobs:
             if curl -fL --retry 3 --connect-timeout 20 -o "$FT_DIR/$F.tmp" "$u"; then
               if gzip -t "$FT_DIR/$F.tmp" 2>/dev/null; then
                 mv "$FT_DIR/$F.tmp" "$FT_DIR/$F"
-                echo "==> freetype 预下载成功"; ls -lh "$FT_DIR/$F"; exit 0
+                # 关键：p4a 要求压缩包旁有 .mark-文件名 标记，
+                # 缺标记会把预置包删掉并重新从 savannah 下载（502 根源）
+                touch "$FT_DIR/.mark-$F"
+                echo "==> freetype 预下载成功"; ls -la "$FT_DIR"; exit 0
               fi
             fi
             rm -f "$FT_DIR/$F.tmp"
