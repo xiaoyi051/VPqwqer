@@ -30,7 +30,7 @@ android.accept_sdk_license = True
 android.enable_androidx = True
 
 # 固定 python-for-android 版本，保证每次云端构建结果一致（含 ffpyplayer/ffmpeg 配方）
-p4a.version = v2024.01.21
+p4a.branch = v2024.01.21
 
 # 应用图标与启动画面（可爱粉主题素材，PIL 预生成）
 icon.filename = assets/icon.png
