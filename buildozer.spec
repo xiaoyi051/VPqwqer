@@ -15,7 +15,7 @@ version = 1.0.0
 requirements = python3, kivy, ffpyplayer, pillow
 
 # 屏幕方向：all 允许横竖屏（看视频可横屏）
-orientation = all
+orientation = portrait, landscape, portrait-reverse, landscape-reverse
 
 # 安卓权限：读取视频、写入 VidPic 封面、安卓11+管理所有文件
 android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, READ_MEDIA_VIDEO, READ_MEDIA_IMAGES, MANAGE_EXTERNAL_STORAGE
